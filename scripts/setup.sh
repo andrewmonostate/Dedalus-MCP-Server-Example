@@ -20,10 +20,10 @@ echo "Installing dependencies..."
 pip install -r requirements.txt
 
 # Copy environment file
-if [ ! -f .env ]; then
-    echo "Creating .env file from template..."
-    cp .env.example .env
-    echo "Please edit .env to add your API keys (optional for local testing)"
+if [ ! -f .env.local ]; then
+    echo "Creating .env.local file from template..."
+    cp config/.env.example .env.local
+    echo "Please edit .env.local to add your API keys (optional for local testing)"
 fi
 
 # Create docs directory if it doesn't exist

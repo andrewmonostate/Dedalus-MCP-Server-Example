@@ -412,7 +412,7 @@ def main():
         print(f"Documentation MCP Server loaded successfully")
         print(f"Docs directory: {DOCS_DIR.absolute()}")
         print(f"Tools available: list_docs, search_docs, ask_docs, index_docs, analyze_docs")
-        print(f"Documents found: {len(list(DOCS_DIR.glob('*.md')))}")
+        print(f"Documents found: {len(list(DOCS_DIR.rglob('*.md')))}")
         return 0
     
     # Run the server in stdio mode (standard for MCP)

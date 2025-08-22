@@ -7,8 +7,8 @@ import sys
 import os
 from pathlib import Path
 
-# Add current directory to path
-sys.path.insert(0, '.')
+# Add parent directory to path to find src
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def test_server():
     """Test all server functionality"""
@@ -64,7 +64,7 @@ def test_server():
         # Test with API key
         result = ask_docs(
             "What is the total prize pool for the hackathon?",
-            context_docs=["yc-agents-hackathon.md"]
+            context_docs=["hackathon/yc-agents-hackathon.md"]
         )
         
         if result.get("model"):
