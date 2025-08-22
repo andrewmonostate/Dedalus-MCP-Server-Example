@@ -59,6 +59,9 @@ if DOCS_DIR is None:
     except (OSError, PermissionError):
         # If even /tmp fails, just use current directory
         DOCS_DIR = Path(".")
+    except Exception:
+        # Catch any other unexpected errors
+        DOCS_DIR = Path(".")
 
 EMBEDDINGS_CACHE = {}
 METADATA_CACHE = {}
@@ -482,8 +485,13 @@ def main():
     """Main entry point for the MCP server"""
     import sys
     
-    # Ensure docs directory exists
-    DOCS_DIR.mkdir(exist_ok=True)
+    # Ensure docs directory exists (but don't fail if we can't create it)
+    try:
+        DOCS_DIR.mkdir(exist_ok=True)
+    except Exception:
+        # If we can't create the directory, just continue
+        # The server can still respond to queries even without docs
+        pass
     
     # Check if running in stdio mode (default for MCP)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":

@@ -15,7 +15,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["src"]
-py-modules = ["main"]
 
 [project.scripts]
 main = "src.main:main"
