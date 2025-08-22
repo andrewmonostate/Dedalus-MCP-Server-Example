@@ -17,13 +17,13 @@ cp config/.env.example .env.local
 python tests/test_server.py
 
 # Run
-python src/server.py
+python src/main.py
 ```
 
 ## Deploy to Dedalus
 
 ```bash
-dedalus deploy ./src/server.py --name "your-docs-server"
+dedalus deploy ./src/main.py --name "your-docs-server"
 ```
 
 ## Features

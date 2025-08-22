@@ -16,7 +16,7 @@ def test_server():
     
     # Import server functions
     try:
-        from src.server import list_docs, search_docs, ask_docs, index_docs
+        from src.main import list_docs, search_docs, ask_docs, index_docs
         print("[OK] Server modules imported successfully")
     except ImportError as e:
         print(f"[ERROR] Failed to import server: {e}")
