@@ -13,9 +13,9 @@ def main():
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     
     try:
-        from src.main import mcp
-        # Run the FastMCP server directly in stdio mode
-        mcp.run()
+        from src.main import main as server_main
+        # Run the server's main function
+        return server_main()
     except Exception as e:
         print(f"Error starting MCP server: {e}", file=sys.stderr)
         sys.exit(1)
