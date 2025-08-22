@@ -23,7 +23,22 @@ load_dotenv()  # Also load .env if exists
 from mcp.server.fastmcp import FastMCP
 import mcp.types as types
 
-mcp = FastMCP("Documentation Server")
+mcp = FastMCP(
+    name="Documentation Server",
+    instructions="""This MCP server provides access to documentation files with AI-powered search and Q&A capabilities.
+    
+Available tools:
+- list_docs(): List all documentation files
+- search_docs(query): Search documentation with keywords
+- ask_docs(question): Get AI-powered answers from documentation
+- index_docs(): Index documents for better search
+- analyze_docs(task): Analyze documentation for specific tasks
+
+Resources:
+- docs://{path}: Access any markdown documentation file directly
+
+This server includes rate limiting (10 requests/minute) to protect API keys."""
+)
 
 # Configuration
 # Check for docs in multiple locations (for Dedalus deployment compatibility)
