@@ -24,7 +24,24 @@ import mcp.types as types
 mcp = FastMCP("Documentation Server")
 
 # Configuration
-DOCS_DIR = Path(os.getenv("DOCS_DIR", "./docs"))
+# Check for docs in multiple locations (for Dedalus deployment compatibility)
+possible_docs_dirs = [
+    Path(os.getenv("DOCS_DIR", "./docs")),  # Environment variable
+    Path("/app/docs"),  # Dedalus container path
+    Path("./docs"),     # Local path
+]
+
+DOCS_DIR = None
+for dir_path in possible_docs_dirs:
+    if dir_path.exists():
+        DOCS_DIR = dir_path
+        break
+
+# If no docs dir exists, use the first option and create it
+if DOCS_DIR is None:
+    DOCS_DIR = possible_docs_dirs[0]
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+
 EMBEDDINGS_CACHE = {}
 METADATA_CACHE = {}
 
