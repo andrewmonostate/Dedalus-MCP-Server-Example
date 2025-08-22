@@ -8,7 +8,9 @@ import json
 import hashlib
 from pathlib import Path
 from typing import Optional, Dict, List, Any
-from datetime import datetime
+from datetime import datetime, timedelta
+from collections import defaultdict
+import time
 from dotenv import load_dotenv
 
 # Load environment variables - try multiple locations
@@ -44,6 +46,39 @@ if DOCS_DIR is None:
 
 EMBEDDINGS_CACHE = {}
 METADATA_CACHE = {}
+
+# Rate limiting for API protection
+class RateLimiter:
+    """Simple rate limiter to protect API keys from abuse"""
+    def __init__(self, max_requests: int = 10, window_seconds: int = 60):
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self.requests = defaultdict(list)
+    
+    def is_allowed(self, identifier: str) -> bool:
+        """Check if request is allowed for this identifier"""
+        now = time.time()
+        # Clean old requests outside window
+        self.requests[identifier] = [
+            req_time for req_time in self.requests[identifier]
+            if now - req_time < self.window_seconds
+        ]
+        
+        # Check if under limit
+        if len(self.requests[identifier]) < self.max_requests:
+            self.requests[identifier].append(now)
+            return True
+        return False
+    
+    def get_reset_time(self, identifier: str) -> int:
+        """Get seconds until rate limit resets"""
+        if not self.requests[identifier]:
+            return 0
+        oldest = min(self.requests[identifier])
+        return max(0, int(self.window_seconds - (time.time() - oldest)))
+
+# Initialize rate limiter (10 requests per minute)
+rate_limiter = RateLimiter(max_requests=10, window_seconds=60)
 
 
 def get_doc_metadata(file_path: Path) -> Dict[str, Any]:
@@ -194,7 +229,8 @@ def search_docs(
 def ask_docs(
     question: str,
     context_docs: Optional[List[str]] = None,
-    max_context_length: int = 4000
+    max_context_length: int = 4000,
+    user_id: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Answer questions about documentation using AI
@@ -203,10 +239,21 @@ def ask_docs(
         question: The question to answer
         context_docs: Optional list of document paths to use as context
         max_context_length: Maximum characters of context to include
+        user_id: Optional user identifier for rate limiting
     
     Returns:
         AI-generated answer with sources
     """
+    # Rate limiting check
+    identifier = user_id or "default"
+    if not rate_limiter.is_allowed(identifier):
+        reset_time = rate_limiter.get_reset_time(identifier)
+        return {
+            "error": "Rate limit exceeded",
+            "message": f"Too many requests. Please wait {reset_time} seconds before trying again.",
+            "reset_in_seconds": reset_time,
+            "limit": "10 requests per minute"
+        }
     # If no context docs specified, search for relevant ones
     if not context_docs:
         search_results = search_docs(question, max_results=3)
