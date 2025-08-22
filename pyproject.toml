@@ -18,4 +18,4 @@ packages = ["src"]
 py-modules = ["main"]
 
 [project.scripts]
-main = "main:main"
+main = "src.main:main"

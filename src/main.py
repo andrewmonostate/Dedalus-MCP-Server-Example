@@ -4,24 +4,20 @@ A Model Context Protocol server for serving and querying documentation
 """
 
 import os
-import json
 import hashlib
 from pathlib import Path
 from typing import Optional, Dict, List, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 import time
 from dotenv import load_dotenv
+from mcp.server.fastmcp import FastMCP
 
 # Load environment variables - try multiple locations
-from pathlib import Path
 env_path = Path('.') / '.env.local'
 if env_path.exists():
     load_dotenv(env_path)
 load_dotenv()  # Also load .env if exists
-
-from mcp.server.fastmcp import FastMCP
-import mcp.types as types
 
 mcp = FastMCP(
     name="Documentation Server",
@@ -54,10 +50,15 @@ for dir_path in possible_docs_dirs:
         DOCS_DIR = dir_path
         break
 
-# If no docs dir exists, use the first option and create it
+# If no docs dir exists, use a fallback that should exist
 if DOCS_DIR is None:
-    DOCS_DIR = possible_docs_dirs[0]
-    DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    # Try to create in /tmp as a last resort (always writable)
+    DOCS_DIR = Path("/tmp/docs")
+    try:
+        DOCS_DIR.mkdir(parents=True, exist_ok=True)
+    except (OSError, PermissionError):
+        # If even /tmp fails, just use current directory
+        DOCS_DIR = Path(".")
 
 EMBEDDINGS_CACHE = {}
 METADATA_CACHE = {}
@@ -117,7 +118,7 @@ def get_doc_metadata(file_path: Path) -> Dict[str, Any]:
             if line.startswith('# '):
                 metadata["title"] = line[2:].strip()
                 break
-    except:
+    except (OSError, UnicodeDecodeError):
         pass
     
     METADATA_CACHE[file_path] = metadata
@@ -227,7 +228,7 @@ def search_docs(
                     if end < len(content):
                         snippet = snippet + "..."
                     metadata["snippet"] = snippet
-            except:
+            except (OSError, UnicodeDecodeError):
                 pass
         
         if score > 0:
@@ -295,7 +296,7 @@ def ask_docs(
             context_parts.append(f"--- {doc_path} ---\n{content}")
             sources.append(doc_path)
             total_length += len(content)
-        except:
+        except (OSError, UnicodeDecodeError):
             continue
     
     if not context_parts:
@@ -479,7 +480,6 @@ def documentation_query(
 
 def main():
     """Main entry point for the MCP server"""
-    import asyncio
     import sys
     
     # Ensure docs directory exists
@@ -488,15 +488,15 @@ def main():
     # Check if running in stdio mode (default for MCP)
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
         # Test mode - just verify everything loads
-        print(f"Documentation MCP Server loaded successfully")
+        print("Documentation MCP Server loaded successfully")
         print(f"Docs directory: {DOCS_DIR.absolute()}")
-        print(f"Tools available: list_docs, search_docs, ask_docs, index_docs, analyze_docs")
+        print("Tools available: list_docs, search_docs, ask_docs, index_docs, analyze_docs")
         print(f"Documents found: {len(list(DOCS_DIR.rglob('*.md')))}")
         return 0
     
     # Run the server in stdio mode (standard for MCP)
     # This is what Dedalus will call
-    mcp.run()
+    mcp.run("stdio")
     return 0
 
 

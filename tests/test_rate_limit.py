@@ -7,8 +7,7 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.main import rate_limiter, ask_docs
-import time
+from src.main import ask_docs
 
 def test_rate_limiting():
     """Test that rate limiting works correctly"""
@@ -39,12 +38,12 @@ def test_rate_limiting():
     )
     
     if "error" in result and result["error"] == "Rate limit exceeded":
-        print(f"  Request 11: Rate limited as expected!")
+        print("  Request 11: Rate limited as expected!")
         print(f"  Reset in: {result['reset_in_seconds']} seconds")
         print(f"  Message: {result['message']}")
         success = True
     else:
-        print(f"  Request 11: NOT rate limited - This is a problem!")
+        print("  Request 11: NOT rate limited - This is a problem!")
         success = False
     
     # Test that different users have separate limits

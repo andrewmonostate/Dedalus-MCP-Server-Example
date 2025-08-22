@@ -8,7 +8,6 @@ To use this client:
 """
 
 import asyncio
-import os
 from typing import List, Dict, Any
 from dedalus_labs import AsyncDedalus, DedalusRunner
 from dotenv import load_dotenv

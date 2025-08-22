@@ -5,7 +5,6 @@ Test script to verify the MCP server is working correctly
 
 import sys
 import os
-from pathlib import Path
 
 # Add parent directory to path to find src
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -56,7 +55,7 @@ def test_server():
         # Test without API key
         result = ask_docs("What is MCP?")
         if "note" in result:
-            print(f"[OK] Server handles missing API key correctly")
+            print("[OK] Server handles missing API key correctly")
             print(f"   Note: {result['note'][:50]}...")
     else:
         print("[OK] OpenAI API key found")
@@ -68,7 +67,7 @@ def test_server():
         )
         
         if result.get("model"):
-            print(f"[OK] AI responded successfully:")
+            print("[OK] AI responded successfully:")
             print(f"   Model: {result['model']}")
             print(f"   Answer: {result['answer'][:100]}...")
             print(f"   Sources: {result.get('sources', [])}")
